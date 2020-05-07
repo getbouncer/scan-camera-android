@@ -3,10 +3,10 @@ package com.getbouncer.scan.camera.camera2
 import android.graphics.Bitmap
 import android.media.ImageReader
 import androidx.annotation.RestrictTo
+import com.getbouncer.scan.camera.FrameConverter
 import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
 import com.getbouncer.scan.framework.image.isSupportedFormat
 import com.getbouncer.scan.framework.image.toBitmap
-import com.getbouncer.scan.camera.FrameConverter
 import kotlinx.coroutines.runBlocking
 
 abstract class OnImageAvailableListener : ImageReader.OnImageAvailableListener {
