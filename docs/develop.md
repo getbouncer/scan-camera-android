@@ -1,6 +1,6 @@
 # Development
 
-cardscan-camera development guide
+Development guide
 
 ## Contents
 
@@ -13,49 +13,49 @@ cardscan-camera development guide
 
 ## Dependencies
 
-CardScan requires kotlin coroutine libraries for handling concurrency. Note that your app does not need to be written in kotlin to work with CardScan; The [demo app](https://github.com/getbouncer/cardscan-demo-android) is written in Java.
+This library requires kotlin coroutine libraries for handling concurrency. Note that your app does not need to be written in kotlin to work with this library; The [demo app](https://github.com/getbouncer/cardscan-demo-android) is written in Java.
 
 ## Architecture
 
-For an overview of the architecture and design of the cardscan framework, see the [architecture documentation](https://github.com/getbouncer/cardscan-base-android/blob/master/docs/architecture.md).
+For an overview of the architecture and design of the scan framework, see the [architecture documentation](https://github.com/getbouncer/scan-framework-android/blob/master/docs/architecture.md).
 
 ## Code Organization
 
-CardScan Camera consists of these modules:
-* [cardscan-base](https://github.com/getbouncer/cardscan-base-android)
-* [cardscan-camera](https://github.com/getbouncer/cardscan-camera-android)
+This library consists of these modules:
+* [scan-framework](#scan-framework)
+* [scan-camera](#scan-camera)
 
-![cardscan_camera dependencies](images/cardscan_camera_dependencies.png)
+![dependencies](images/dependencies.png)
 
-### cardscan base
+### scan-framework
 
-[CardScan Base](https://github.com/getbouncer/cardscan-base-android) contains the framework and machine learning models used to scan cards. See the [architecture document](https://github.com/getbouncer/cardscan-base-android/blob/master/docs/architecture.md) for details on how CardScan processes images from the camera.
+[scan-framework](https://github.com/getbouncer/scan-framework-android) contains the framework and machine learning models used to scan cards. See the [architecture document](https://github.com/getbouncer/scan-framework-android/tree/master/docs/architecture.md) for details on how CardScan processes images from the camera.
 
-### cardscan camera
+### scan-camera
 
-[CardScan Camera](https://github.com/getbouncer/cardscan-camera-android) contains the camera interfaces for setting up the camera on the device and receiving images from it. It also handles converting the images from the camera to a processable format.
+[scan-camera](https://github.com/getbouncer/scan-camera-android) contains the camera interfaces for setting up the camera on the device and receiving images from it. It also handles converting the images from the camera to a processable format.
 
 ## Building
 
 Check out the project using `git`. Note that this project makes use of submodules, so a `recursive` clone is recommended.
 ```bash
-git clone --recursive https://github.com/getbouncer/cardscan-camera-android
+git clone --recursive https://github.com/getbouncer/scan-camera-android
 ```
 
 To build the project, run the following command:
 ```bash
-./gradlew cardscan-camera:build
+./gradlew scan-camera:build
 ```
 
 To create an AAR release of the library, run the following command:
 ```bash
-./gradlew cardscan-camera:assembleRelease
+./gradlew scan-camera:assembleRelease
 ```
-This will place an AAR file in `cardscan-camera/build/outputs/aar`
+This will place an AAR file in `scan-camera/build/outputs/aar`
 
 ## Contributing
 
-CardScan libraries follow a standard github contribution flow.
+This library follows a standard github contribution flow.
 
 1. Create a new github feature branch
     ```bash
