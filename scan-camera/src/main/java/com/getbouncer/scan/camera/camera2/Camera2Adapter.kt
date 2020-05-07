@@ -45,9 +45,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
-import com.getbouncer.scan.framework.image.isSupportedFormat
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
+import com.getbouncer.scan.framework.image.isSupportedFormat
 import java.util.Locale
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
