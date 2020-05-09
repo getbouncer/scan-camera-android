@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.0006](https://github.com/getbouncer/scan-camera-android/tree/2.0.0006) (2020-05-09)
+
+[Full Changelog](https://github.com/getbouncer/scan-camera-android/compare/2.0.0005...2.0.0006)
+
 ## [2.0.0005](https://github.com/getbouncer/scan-camera-android/tree/2.0.0005) (2020-05-08)
 
 [Full Changelog](https://github.com/getbouncer/scan-camera-android/compare/70e9702f2bb0a99ef89e1477064eb541b661170f...2.0.0005)
