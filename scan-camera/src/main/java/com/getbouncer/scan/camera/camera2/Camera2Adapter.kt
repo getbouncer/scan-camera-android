@@ -38,6 +38,7 @@ import android.media.ImageReader
 import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
+import android.util.Log
 import android.util.Size
 import android.view.Surface
 import android.view.TextureView
@@ -47,6 +48,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
+import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.image.isSupportedFormat
 import java.util.Locale
 import java.util.concurrent.Semaphore
@@ -363,7 +365,9 @@ class Camera2Adapter(
         try {
             // Wait for camera to open - 2.5 seconds is sufficient
             if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
-                throw RuntimeException("Time out waiting to lock camera opening.")
+                Log.e(Config.logTag, "Time out waiting to lock camera opening.")
+                cameraErrorListener.onCameraOpenError(null)
+                return
             }
             manager.openCamera(cameraId, stateCallback, cameraHandler)
         } catch (e: CameraAccessException) {
