@@ -3,10 +3,23 @@ package com.getbouncer.scan.camera
 import android.graphics.PointF
 import android.util.Size
 import android.view.Surface
+import androidx.annotation.IntDef
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import kotlin.math.max
 import kotlin.math.min
+
+/**
+ * Valid integer rotation values.
+ */
+@IntDef(
+    Surface.ROTATION_0,
+    Surface.ROTATION_90,
+    Surface.ROTATION_180,
+    Surface.ROTATION_270
+)
+@Retention(AnnotationRetention.SOURCE)
+private annotation class RotationValue
 
 abstract class CameraAdapter : LifecycleObserver {
 
@@ -19,7 +32,7 @@ abstract class CameraAdapter : LifecycleObserver {
          * @param displayOrientation: The enum value of the display rotation (e.g. Surface.ROTATION_0)
          * @param sensorOrientation: The rotation of the sensor in degrees
          */
-        internal fun calculateImageRotationDegrees(displayOrientation: Int, sensorOrientation: Int) =
+        internal fun calculateImageRotationDegrees(@RotationValue displayOrientation: Int, sensorOrientation: Int) =
             (when (displayOrientation) {
                 Surface.ROTATION_0 -> sensorOrientation
                 Surface.ROTATION_90 -> sensorOrientation - 90
@@ -73,7 +86,9 @@ abstract class CameraAdapter : LifecycleObserver {
     /**
      * Bind this camera manager to a lifecycle.
      */
-    abstract fun bindToLifecycle(lifecycleOwner: LifecycleOwner)
+    open fun bindToLifecycle(lifecycleOwner: LifecycleOwner) {
+        lifecycleOwner.lifecycle.addObserver(this)
+    }
 
     /**
      * Execute a task with flash support.

@@ -44,7 +44,6 @@ import android.view.Surface
 import android.view.TextureView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
@@ -158,7 +157,7 @@ class Camera2Adapter(
 
         override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?) = true
 
-        override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) = Unit
+        override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) { }
     }
 
     private val stateCallback = object : CameraDevice.StateCallback() {
@@ -185,10 +184,6 @@ class Camera2Adapter(
             onDisconnected(camera)
             cameraErrorListener.onCameraOpenError(CameraDeviceCallbackOpenException(camera.id, error))
         }
-    }
-
-    override fun bindToLifecycle(lifecycleOwner: LifecycleOwner) {
-        lifecycleOwner.lifecycle.addObserver(this)
     }
 
     @Synchronized
