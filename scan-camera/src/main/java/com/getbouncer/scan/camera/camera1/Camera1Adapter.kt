@@ -265,7 +265,7 @@ class Camera1Adapter(
         if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             result = (info.orientation + degrees) % 360
             result = (360 - result) % 360 // compensate for the mirror
-        } else {  // back-facing
+        } else { // back-facing
             result = (info.orientation - degrees + 360) % 360
         }
 
@@ -288,7 +288,7 @@ class Camera1Adapter(
     private inner class CameraPreview(
         context: Context,
         private val mPreviewCallback: PreviewCallback
-    ): SurfaceView(context), AutoFocusCallback, SurfaceHolder.Callback {
+    ) : SurfaceView(context), AutoFocusCallback, SurfaceHolder.Callback {
 
         private var mHolder: SurfaceHolder = holder
 

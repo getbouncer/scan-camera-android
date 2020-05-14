@@ -20,7 +20,7 @@ class ImageReceiverAnalyzer<ImageFormat, State, Output>(
     private val loop: ProcessBoundAnalyzerLoop<ImageFormat, State, Output>,
     private val frameConverter: FrameConverter<Bitmap, ImageFormat>,
     private val analysisResolution: Size
-): ImageReceiver {
+) : ImageReceiver {
     override fun receiveImage(image: ByteArray, imageSize: Size, rotationDegrees: Int, camera: Camera) {
         runBlocking {
             val scale = max(
