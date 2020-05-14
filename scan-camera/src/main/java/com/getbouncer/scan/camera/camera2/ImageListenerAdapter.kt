@@ -9,13 +9,13 @@ import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
 import com.getbouncer.scan.framework.image.isSupportedFormat
 import com.getbouncer.scan.framework.image.scale
 import com.getbouncer.scan.framework.image.toBitmap
-import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
+import kotlinx.coroutines.runBlocking
 
 abstract class OnImageAvailableListener(
     private val analysisResolution: Size
-): ImageReader.OnImageAvailableListener {
+) : ImageReader.OnImageAvailableListener {
     var rotationDegrees = 0
 
     private val processing = AtomicBoolean(false)

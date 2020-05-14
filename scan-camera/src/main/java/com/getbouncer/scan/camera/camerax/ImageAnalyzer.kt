@@ -12,11 +12,11 @@ import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
 import com.getbouncer.scan.framework.image.isSupportedFormat
 import com.getbouncer.scan.framework.image.scale
 import com.getbouncer.scan.framework.image.toBitmap
-import kotlinx.coroutines.runBlocking
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.max
+import kotlinx.coroutines.runBlocking
 
-interface RotatingImageAnalyzer: ImageAnalysis.Analyzer {
+interface RotatingImageAnalyzer : ImageAnalysis.Analyzer {
     var rotationDegrees: Int
 }
 

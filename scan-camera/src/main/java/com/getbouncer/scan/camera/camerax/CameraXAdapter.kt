@@ -116,10 +116,9 @@ class CameraXAdapter(
                 }
 
                 this.cameraSelector = cameraSelector
-            } catch(exc: Exception) {
-                cameraErrorListener.onCameraOpenError(exc)
+            } catch (t: Throwable) {
+                cameraErrorListener.onCameraOpenError(t)
             }
-
         }, ContextCompat.getMainExecutor(activity))
     }
 

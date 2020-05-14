@@ -49,8 +49,6 @@ import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
 import com.getbouncer.scan.framework.Config
 import com.getbouncer.scan.framework.image.isSupportedFormat
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.util.Locale
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
