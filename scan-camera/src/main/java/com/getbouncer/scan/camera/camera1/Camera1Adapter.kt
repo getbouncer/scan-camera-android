@@ -20,15 +20,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
+import java.util.ArrayList
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.ArrayList
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
 
 private const val ASPECT_TOLERANCE = 0.2
 

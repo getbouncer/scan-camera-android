@@ -9,8 +9,8 @@ import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
 import com.getbouncer.scan.framework.image.nv21ToYuv
 import com.getbouncer.scan.framework.image.scale
 import com.getbouncer.scan.framework.image.toBitmap
-import kotlinx.coroutines.runBlocking
 import kotlin.math.max
+import kotlinx.coroutines.runBlocking
 
 interface ImageReceiver {
     fun receiveImage(image: ByteArray, imageSize: Size, rotationDegrees: Int, camera: Camera)
