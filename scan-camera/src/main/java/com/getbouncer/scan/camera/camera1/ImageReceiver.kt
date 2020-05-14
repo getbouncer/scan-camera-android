@@ -3,7 +3,6 @@ package com.getbouncer.scan.camera.camera1
 
 import android.graphics.Bitmap
 import android.hardware.Camera
-import android.util.Log
 import android.util.Size
 import com.getbouncer.scan.camera.FrameConverter
 import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
@@ -28,7 +27,6 @@ class ImageReceiverAnalyzer<ImageFormat, State, Output>(
                 analysisResolution.width.toFloat() / imageSize.width,
                 analysisResolution.height.toFloat() / imageSize.height
             )
-            Log.d("AGW", "Image size: $imageSize")
             val bitmap = image.nv21ToYuv(imageSize.width, imageSize.height).toBitmap().scale(scale)
             camera.addCallbackBuffer(image)
 

@@ -6,12 +6,11 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.ImageFormat
 import android.graphics.PointF
+import android.graphics.Rect
 import android.hardware.Camera
 import android.hardware.Camera.AutoFocusCallback
 import android.hardware.Camera.PreviewCallback
-import android.os.Handler
 import android.util.DisplayMetrics
-import android.util.Log
 import android.util.Size
 import android.view.Surface
 import android.view.SurfaceHolder
@@ -21,12 +20,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
-import com.getbouncer.scan.framework.Config
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.IOException
+import java.util.ArrayList
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -48,21 +47,46 @@ class Camera1Adapter(
     private var mRotation = 0
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
-        // TODO("Not yet implemented")
-        task(false)
+        val camera = mCamera
+        if (camera != null) {
+            task(camera.parameters.supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_TORCH))
+        }
     }
 
     override fun setTorchState(on: Boolean) {
-//        TODO("Not yet implemented")
+        val camera = mCamera
+        if (camera != null) {
+            val parameters = camera.parameters
+            if (on) {
+                parameters.flashMode = Camera.Parameters.FLASH_MODE_TORCH
+            } else {
+                parameters.flashMode = Camera.Parameters.FLASH_MODE_OFF
+            }
+            setCameraParameters(camera, parameters)
+            startCameraPreview()
+        }
     }
 
-    override fun isTorchOn(): Boolean {
-//        TODO("Not yet implemented")
-        return false
-    }
+    override fun isTorchOn(): Boolean =
+        mCamera?.parameters?.flashMode == Camera.Parameters.FLASH_MODE_TORCH
 
     override fun setFocus(point: PointF) {
-//        TODO("Not yet implemented")
+        val camera = mCamera
+        if (camera != null) {
+            val parameters = camera.parameters
+            if (parameters.maxNumFocusAreas > 0) {
+                val focusRect = Rect(
+                    point.x.toInt() - 150,
+                    point.y.toInt() - 150,
+                    point.x.toInt() + 150,
+                    point.y.toInt() + 150
+                )
+                val cameraFocusAreas: MutableList<Camera.Area> = ArrayList()
+                cameraFocusAreas.add(Camera.Area(focusRect, 1000))
+                parameters.focusAreas = cameraFocusAreas
+                setCameraParameters(camera, parameters)
+            }
+        }
     }
 
     override fun onPreviewFrame(bytes: ByteArray, camera: Camera) {
@@ -101,55 +125,58 @@ class Camera1Adapter(
     }
 
     private fun setCameraParameters(
-        camera: Camera?,
+        camera: Camera,
         parameters: Camera.Parameters
     ) {
         try {
-            camera?.parameters = parameters
+            camera.parameters = parameters
         } catch (t: Throwable) {
             cameraErrorListener.onCameraAccessError(t)
         }
     }
 
     private fun startCameraPreview() {
-        startCameraPreviewInternal(0, 5, null)
+        GlobalScope.launch(Dispatchers.Default) {
+            startCameraPreviewInternal(0, 5, null)
+        }
     }
 
-    private fun startCameraPreviewInternal(
+    private suspend fun startCameraPreviewInternal(
         attemptNumber: Int,
         maxAttempts: Int,
         previousThrowable: Throwable?
     ) {
         if (attemptNumber >= maxAttempts) {
-            Log.e(Config.logTag, "Unable to start camera preview", previousThrowable)
+            cameraErrorListener.onCameraOpenError(previousThrowable)
             return
         }
         try {
             mCamera?.startPreview()
         } catch (t: Throwable) {
-            Log.w(Config.logTag, "Could not start camera preview, retrying", t)
-            Handler().postDelayed(
-                { startCameraPreviewInternal(attemptNumber + 1, maxAttempts, t) },
-                500
-            )
+            delay(500)
+            startCameraPreviewInternal(attemptNumber + 1, maxAttempts, t)
         }
     }
 
-    private fun onCameraOpen(camera: Camera?) {
+    private suspend fun onCameraOpen(camera: Camera?) {
         if (camera == null) {
-            val preview = cameraPreview
-            if (preview != null) {
-                preview.holder.removeCallback(preview)
+            withContext(Dispatchers.Main) {
+                val preview = cameraPreview
+                if (preview != null) {
+                    preview.holder.removeCallback(preview)
+                }
+                cameraErrorListener.onCameraOpenError(null)
             }
-            cameraErrorListener.onCameraOpenError(null)
         } else {
             mCamera = camera
             setCameraDisplayOrientation(activity, Camera.CameraInfo.CAMERA_FACING_BACK)
             setCameraPreviewFrame()
             // Create our Preview view and set it as the content of our activity.
             cameraPreview = CameraPreview(activity, this)
-            previewView.removeAllViews()
-            previewView.addView(cameraPreview)
+            withContext(Dispatchers.Main) {
+                previewView.removeAllViews()
+                previewView.addView(cameraPreview)
+            }
         }
     }
 
@@ -222,6 +249,8 @@ class Camera1Adapter(
     }
 
     private fun setCameraDisplayOrientation(activity: Activity, cameraId: Int) {
+        val camera = mCamera ?: return
+
         val info = Camera.CameraInfo()
         Camera.getCameraInfo(cameraId, info)
         val rotation = activity.windowManager.defaultDisplay.rotation
@@ -239,15 +268,16 @@ class Camera1Adapter(
         } else {  // back-facing
             result = (info.orientation - degrees + 360) % 360
         }
+
         try {
-            mCamera!!.stopPreview()
+            camera.stopPreview()
         } catch (e: java.lang.Exception) {
             // preview was already stopped
         }
         try {
-            mCamera!!.setDisplayOrientation(result)
-        } catch (e: java.lang.Exception) {
-            Log.d("Bouncer", "Could not set display orientation", e)
+            camera.setDisplayOrientation(result)
+        } catch (t: Throwable) {
+            cameraErrorListener.onCameraUnsupportedError(t)
         }
         startCameraPreview()
         mRotation = result
@@ -260,6 +290,26 @@ class Camera1Adapter(
         private val mPreviewCallback: PreviewCallback
     ): SurfaceView(context), AutoFocusCallback, SurfaceHolder.Callback {
 
+        private var mHolder: SurfaceHolder = holder
+
+        init {
+            mHolder.addCallback(this)
+
+            val camera = mCamera
+            if (camera != null) {
+                val params = camera.parameters
+                val focusModes = params.supportedFocusModes
+                if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+                    params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
+                } else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
+                    params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO
+                }
+
+                params.setRecordingHint(true)
+                setCameraParameters(camera, params)
+            }
+        }
+
         override fun onAutoFocus(success: Boolean, camera: Camera) { }
 
         /**
@@ -270,12 +320,8 @@ class Camera1Adapter(
                 mCamera?.setPreviewDisplay(holder)
                 mCamera?.setPreviewCallbackWithBuffer(mPreviewCallback)
                 startCameraPreview()
-                //                mCamera.setDisplayOrientation(90);
-            } catch (e: IOException) {
-                Log.d(
-                    "CameraCaptureActivity",
-                    "Error setting camera preview: " + e.message
-                )
+            } catch (t: Throwable) {
+                cameraErrorListener.onCameraOpenError(t)
             }
         }
 
@@ -291,7 +337,7 @@ class Camera1Adapter(
         ) {
             // If your preview can change or rotate, take care of those events here.
             // Make sure to stop the preview before resizing or reformatting it.
-            if (holder.surface == null) {
+            if (mHolder.surface == null) {
                 // preview surface does not exist
                 return
             }
@@ -308,7 +354,7 @@ class Camera1Adapter(
 
             // start preview with new settings
             try {
-                mCamera?.setPreviewDisplay(holder)
+                mCamera?.setPreviewDisplay(mHolder)
                 val bufSize = w * h * ImageFormat.getBitsPerPixel(format) / 8
                 for (i in 0..2) {
                     mCamera?.addCallbackBuffer(ByteArray(bufSize))
@@ -317,24 +363,6 @@ class Camera1Adapter(
                 startCameraPreview()
             } catch (t: Throwable) {
                 cameraErrorListener.onCameraOpenError(t)
-            }
-        }
-
-        init {
-            val camera = mCamera
-            if (camera != null) {
-                // Install a SurfaceHolder.Callback so we get notified when the
-                // underlying surface is created and destroyed.
-                holder.addCallback(this)
-                val params: Camera.Parameters = camera.parameters
-                val focusModes = params.supportedFocusModes
-                if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
-                    params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE
-                } else if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
-                    params.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO
-                }
-                params.setRecordingHint(true)
-                setCameraParameters(camera, params)
             }
         }
     }
