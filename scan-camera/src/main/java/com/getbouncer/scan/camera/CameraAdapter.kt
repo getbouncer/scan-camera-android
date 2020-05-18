@@ -30,16 +30,18 @@ abstract class CameraAdapter : LifecycleObserver {
          * display and the orientation of the camera sensor.
          *
          * @param displayOrientation: The enum value of the display rotation (e.g. Surface.ROTATION_0)
-         * @param sensorOrientation: The rotation of the sensor in degrees
+         * @param sensorRotationDegrees: The rotation of the sensor in degrees
          */
-        internal fun calculateImageRotationDegrees(@RotationValue displayOrientation: Int, sensorOrientation: Int) =
-            (when (displayOrientation) {
-                Surface.ROTATION_0 -> sensorOrientation
-                Surface.ROTATION_90 -> sensorOrientation - 90
-                Surface.ROTATION_180 -> sensorOrientation - 180
-                Surface.ROTATION_270 -> sensorOrientation - 270
-                else -> 0
-            } + 360) % 360
+        internal fun calculateImageRotationDegrees(
+            @RotationValue displayOrientation: Int,
+            sensorRotationDegrees: Int
+        ) = ((when (displayOrientation) {
+            Surface.ROTATION_0 -> sensorRotationDegrees
+            Surface.ROTATION_90 -> sensorRotationDegrees - 90
+            Surface.ROTATION_180 -> sensorRotationDegrees - 180
+            Surface.ROTATION_270 -> sensorRotationDegrees - 270
+            else -> 0
+        } % 360) + 360) % 360
 
         /**
          * Convert a size on the screen to a resolution.
@@ -54,9 +56,9 @@ abstract class CameraAdapter : LifecycleObserver {
          */
         internal fun resolutionToSize(
             resolution: Size,
-            displayRotation: Int,
-            sensorRotation: Int
-        ) = if (areScreenAndSensorPerpendicular(displayRotation, sensorRotation)) {
+            @RotationValue displayRotation: Int,
+            sensorRotationDegrees: Int
+        ) = if (areScreenAndSensorPerpendicular(displayRotation, sensorRotationDegrees)) {
             Size(resolution.height, resolution.width)
         } else {
             resolution
@@ -69,18 +71,20 @@ abstract class CameraAdapter : LifecycleObserver {
          *
          * @return true if the dimensions are swapped, false otherwise.
          */
-        private fun areScreenAndSensorPerpendicular(displayRotation: Int, sensorRotation: Int) =
-            when (displayRotation) {
-                Surface.ROTATION_0, Surface.ROTATION_180 -> {
-                    sensorRotation == 90 || sensorRotation == 270
-                }
-                Surface.ROTATION_90, Surface.ROTATION_270 -> {
-                    sensorRotation == 0 || sensorRotation == 180
-                }
-                else -> {
-                    false
-                }
+        private fun areScreenAndSensorPerpendicular(
+            @RotationValue displayRotation: Int,
+            sensorRotationDegrees: Int
+        ) = when (displayRotation) {
+            Surface.ROTATION_0, Surface.ROTATION_180 -> {
+                sensorRotationDegrees == 90 || sensorRotationDegrees == 270
             }
+            Surface.ROTATION_90, Surface.ROTATION_270 -> {
+                sensorRotationDegrees == 0 || sensorRotationDegrees == 180
+            }
+            else -> {
+                false
+            }
+        }
     }
 
     /**
