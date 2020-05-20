@@ -28,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
 private const val ASPECT_TOLERANCE = 0.2
@@ -109,17 +110,17 @@ class Camera1Adapter(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun onResume() {
-        GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch(Dispatchers.Main) {
             try {
                 var camera: Camera? = null
                 try {
-                    camera = Camera.open()
+                    withContext(Dispatchers.IO) { camera = Camera.open() }
                 } catch (t: Throwable) {
-                    withContext(Dispatchers.Main) { cameraErrorListener.onCameraOpenError(t) }
+                    cameraErrorListener.onCameraOpenError(t)
                 }
-                withContext(Dispatchers.Main) { onCameraOpen(camera) }
+                onCameraOpen(camera)
             } catch (t: Throwable) {
-                withContext(Dispatchers.Main) { cameraErrorListener.onCameraOpenError(t) }
+                cameraErrorListener.onCameraOpenError(t)
             }
         }
     }
