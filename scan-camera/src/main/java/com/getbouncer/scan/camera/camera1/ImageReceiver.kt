@@ -3,6 +3,7 @@ package com.getbouncer.scan.camera.camera1
 
 import android.graphics.Bitmap
 import android.hardware.Camera
+import android.util.Log
 import android.util.Size
 import com.getbouncer.scan.camera.FrameConverter
 import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
@@ -22,15 +23,15 @@ class ImageReceiverAnalyzer<ImageFormat, State, Output>(
     private val analysisResolution: Size
 ) : ImageReceiver {
     override fun receiveImage(image: ByteArray, imageSize: Size, rotationDegrees: Int, camera: Camera) {
-        runBlocking {
-            val scale = max(
+        val scale = max(
                 analysisResolution.width.toFloat() / imageSize.width,
                 analysisResolution.height.toFloat() / imageSize.height
-            )
-            val bitmap = image.nv21ToYuv(imageSize.width, imageSize.height).toBitmap().scale(scale)
-            camera.addCallbackBuffer(image)
+        )
+        val bitmap = image.nv21ToYuv(imageSize.width, imageSize.height).toBitmap().scale(scale)
+        camera.addCallbackBuffer(image)
 
-            loop.processFrame(frameConverter.convertFrameFormat(bitmap, rotationDegrees))
+        runBlocking {
+            Log.d("AGW", "Loop will process frame? ${loop.processFrame(frameConverter.convertFrameFormat(bitmap, rotationDegrees))}")
         }
     }
 }
