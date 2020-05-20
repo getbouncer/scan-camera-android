@@ -131,7 +131,7 @@ class Camera1Adapter(
         try {
             camera.parameters = parameters
         } catch (t: Throwable) {
-            cameraErrorListener.onCameraAccessError(t)
+            // ignore failure to set camera parameters
         }
     }
 
@@ -317,7 +317,7 @@ class Camera1Adapter(
          */
         override fun surfaceCreated(holder: SurfaceHolder) {
             try {
-                mCamera?.setPreviewDisplay(holder)
+                mCamera?.setPreviewDisplay(mHolder)
                 mCamera?.setPreviewCallbackWithBuffer(mPreviewCallback)
                 startCameraPreview()
             } catch (t: Throwable) {
