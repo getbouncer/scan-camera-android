@@ -26,6 +26,7 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -45,6 +46,7 @@ class Camera1Adapter(
     private var mCamera: Camera? = null
     private var cameraPreview: CameraPreview? = null
     private var mRotation = 0
+    private var focusJob: Job? = null
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
         val camera = mCamera
@@ -95,6 +97,8 @@ class Camera1Adapter(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     fun onPause() {
+        focusJob?.cancel()
+
         mCamera?.stopPreview()
         mCamera?.setPreviewCallbackWithBuffer(null)
         mCamera?.release()
@@ -113,13 +117,23 @@ class Camera1Adapter(
             try {
                 var camera: Camera? = null
                 try {
-                    withContext(Dispatchers.IO) { camera = Camera.open() }
+                    withContext(Dispatchers.IO) {
+                        camera = Camera.open()
+                    }
                 } catch (t: Throwable) {
                     cameraErrorListener.onCameraOpenError(t)
                 }
                 onCameraOpen(camera)
             } catch (t: Throwable) {
                 cameraErrorListener.onCameraOpenError(t)
+            }
+        }
+
+        // For some devices (especially Samsung), we need to continuously refocus the camera.
+        focusJob = GlobalScope.launch {
+            while (true) {
+                delay(1000)
+                setFocus(PointF(previewView.width / 2F, previewView.height / 2F))
             }
         }
     }
