@@ -21,6 +21,7 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
 import java.util.ArrayList
+import java.util.Random
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -92,7 +93,12 @@ class Camera1Adapter(
     }
 
     override fun onPreviewFrame(bytes: ByteArray, camera: Camera) {
-        imageReceiver.receiveImage(bytes, Size(camera.parameters.previewSize.width, camera.parameters.previewSize.height), mRotation, camera)
+        imageReceiver.receiveImage(
+            image = bytes,
+            imageSize = Size(camera.parameters.previewSize.width, camera.parameters.previewSize.height),
+            rotationDegrees = mRotation,
+            camera = camera
+        )
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -132,8 +138,12 @@ class Camera1Adapter(
         // For some devices (especially Samsung), we need to continuously refocus the camera.
         focusJob = GlobalScope.launch {
             while (true) {
-                delay(1000)
-                setFocus(PointF(previewView.width / 2F, previewView.height / 2F))
+                delay(5000)
+                val variance = Random().nextFloat() - 0.5F
+                setFocus(PointF(
+                    previewView.width / 2F + variance,
+                    previewView.height / 2F + variance
+                ))
             }
         }
     }
@@ -244,7 +254,8 @@ class Camera1Adapter(
             for (size in sizes) {
                 val ratio = size.width.toDouble() / size.height
                 val ratioDiff = abs(ratio - targetRatio)
-                if (size.height >= h && ratioDiff <= minDiffRatio && size.height <= MAXIMUM_RESOLUTION.height && size.width <= MAXIMUM_RESOLUTION.width) {
+                if (size.height >= h && ratioDiff <= minDiffRatio &&
+                        size.height <= MAXIMUM_RESOLUTION.height && size.width <= MAXIMUM_RESOLUTION.width) {
                     optimalSize = size
                     minDiffRatio = ratioDiff
                 }

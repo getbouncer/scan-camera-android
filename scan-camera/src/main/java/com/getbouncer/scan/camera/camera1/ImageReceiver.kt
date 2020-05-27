@@ -3,7 +3,6 @@ package com.getbouncer.scan.camera.camera1
 
 import android.graphics.Bitmap
 import android.hardware.Camera
-import android.util.Log
 import android.util.Size
 import com.getbouncer.scan.camera.FrameConverter
 import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
@@ -31,7 +30,7 @@ class ImageReceiverAnalyzer<ImageFormat, State, Output>(
         camera.addCallbackBuffer(image)
 
         runBlocking {
-            Log.d("AGW", "Loop will process frame? ${loop.processFrame(frameConverter.convertFrameFormat(bitmap, rotationDegrees))}")
+            loop.processFrame(frameConverter.convertFrameFormat(bitmap, rotationDegrees))
         }
     }
 }
