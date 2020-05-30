@@ -48,11 +48,16 @@ class Camera1Adapter(
     private var cameraPreview: CameraPreview? = null
     private var mRotation = 0
     private var focusJob: Job? = null
+    private var onCameraAvailableListener: ((Camera) -> Unit)? = null
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
         val camera = mCamera
         if (camera != null) {
             task(camera.parameters.supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_TORCH))
+        } else {
+            onCameraAvailableListener = { cam ->
+                task(cam.parameters.supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_TORCH))
+            }
         }
     }
 
@@ -198,6 +203,11 @@ class Camera1Adapter(
             // Create our Preview view and set it as the content of our activity.
             cameraPreview = CameraPreview(activity, this)
             withContext(Dispatchers.Main) {
+                val listener = onCameraAvailableListener
+                if (listener != null) {
+                    listener(camera)
+                }
+
                 previewView.removeAllViews()
                 previewView.addView(cameraPreview)
             }
