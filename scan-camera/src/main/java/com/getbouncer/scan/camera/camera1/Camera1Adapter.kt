@@ -20,6 +20,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
+import java.lang.ref.WeakReference
 import java.util.ArrayList
 import java.util.Random
 import kotlin.math.abs
@@ -48,11 +49,16 @@ class Camera1Adapter(
     private var cameraPreview: CameraPreview? = null
     private var mRotation = 0
     private var focusJob: Job? = null
+    private var onCameraAvailableListener: WeakReference<((Camera) -> Unit)?> = WeakReference(null)
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
         val camera = mCamera
         if (camera != null) {
             task(camera.parameters.supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_TORCH))
+        } else {
+            onCameraAvailableListener = WeakReference { cam ->
+                task(cam.parameters.supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_TORCH))
+            }
         }
     }
 
@@ -198,6 +204,11 @@ class Camera1Adapter(
             // Create our Preview view and set it as the content of our activity.
             cameraPreview = CameraPreview(activity, this)
             withContext(Dispatchers.Main) {
+                onCameraAvailableListener.get()?.let {
+                    it(camera)
+                }
+                onCameraAvailableListener.clear()
+
                 previewView.removeAllViews()
                 previewView.addView(cameraPreview)
             }
