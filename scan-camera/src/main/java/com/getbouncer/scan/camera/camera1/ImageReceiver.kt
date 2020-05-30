@@ -22,14 +22,14 @@ class ImageReceiverAnalyzer<ImageFormat, State, Output>(
     private val analysisResolution: Size
 ) : ImageReceiver {
     override fun receiveImage(image: ByteArray, imageSize: Size, rotationDegrees: Int, camera: Camera) {
-        runBlocking {
-            val scale = max(
+        val scale = max(
                 analysisResolution.width.toFloat() / imageSize.width,
                 analysisResolution.height.toFloat() / imageSize.height
-            )
-            val bitmap = image.nv21ToYuv(imageSize.width, imageSize.height).toBitmap().scale(scale)
-            camera.addCallbackBuffer(image)
+        )
+        val bitmap = image.nv21ToYuv(imageSize.width, imageSize.height).toBitmap().scale(scale)
+        camera.addCallbackBuffer(image)
 
+        runBlocking {
             loop.processFrame(frameConverter.convertFrameFormat(bitmap, rotationDegrees))
         }
     }

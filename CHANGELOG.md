@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.0.0008](https://github.com/getbouncer/scan-camera-android/tree/2.0.0008) (2020-05-21)
+
+[Full Changelog](https://github.com/getbouncer/scan-camera-android/compare/2.0.0007...2.0.0008)
+
+**Merged pull requests:**
+
+- Refocus camera [\#15](https://github.com/getbouncer/scan-camera-android/pull/15) ([awushensky](https://github.com/awushensky))
+- Simplify camera start [\#14](https://github.com/getbouncer/scan-camera-android/pull/14) ([awushensky](https://github.com/awushensky))
+- Ignore camera config change failures [\#13](https://github.com/getbouncer/scan-camera-android/pull/13) ([awushensky](https://github.com/awushensky))
+- Bump kotlinx-coroutines-core from 1.3.6 to 1.3.7 [\#12](https://github.com/getbouncer/scan-camera-android/pull/12) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Bump kotlinx-coroutines-test from 1.3.6 to 1.3.7 [\#11](https://github.com/getbouncer/scan-camera-android/pull/11) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Bump com.github.dcendents.android-maven from 2.0 to 2.1 [\#8](https://github.com/getbouncer/scan-camera-android/pull/8) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Bump com.jfrog.bintray from 1.7.3 to 1.8.5 [\#7](https://github.com/getbouncer/scan-camera-android/pull/7) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Add tests to camera [\#5](https://github.com/getbouncer/scan-camera-android/pull/5) ([awushensky](https://github.com/awushensky))
+- Remove camerax and camera2 [\#4](https://github.com/getbouncer/scan-camera-android/pull/4) ([awushensky](https://github.com/awushensky))
+- Add camera1 and camerax [\#3](https://github.com/getbouncer/scan-camera-android/pull/3) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0007](https://github.com/getbouncer/scan-camera-android/tree/2.0.0007) (2020-05-12)
 
 [Full Changelog](https://github.com/getbouncer/scan-camera-android/compare/2.0.0006...2.0.0007)

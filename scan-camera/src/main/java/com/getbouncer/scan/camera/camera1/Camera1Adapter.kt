@@ -21,11 +21,13 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
 import java.util.ArrayList
+import java.util.Random
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -45,6 +47,7 @@ class Camera1Adapter(
     private var mCamera: Camera? = null
     private var cameraPreview: CameraPreview? = null
     private var mRotation = 0
+    private var focusJob: Job? = null
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
         val camera = mCamera
@@ -90,11 +93,18 @@ class Camera1Adapter(
     }
 
     override fun onPreviewFrame(bytes: ByteArray, camera: Camera) {
-        imageReceiver.receiveImage(bytes, Size(camera.parameters.previewSize.width, camera.parameters.previewSize.height), mRotation, camera)
+        imageReceiver.receiveImage(
+            image = bytes,
+            imageSize = Size(camera.parameters.previewSize.width, camera.parameters.previewSize.height),
+            rotationDegrees = mRotation,
+            camera = camera
+        )
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     fun onPause() {
+        focusJob?.cancel()
+
         mCamera?.stopPreview()
         mCamera?.setPreviewCallbackWithBuffer(null)
         mCamera?.release()
@@ -109,17 +119,31 @@ class Camera1Adapter(
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     fun onResume() {
-        GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch(Dispatchers.Main) {
             try {
                 var camera: Camera? = null
                 try {
-                    camera = Camera.open()
+                    withContext(Dispatchers.IO) {
+                        camera = Camera.open()
+                    }
                 } catch (t: Throwable) {
-                    withContext(Dispatchers.Main) { cameraErrorListener.onCameraOpenError(t) }
+                    cameraErrorListener.onCameraOpenError(t)
                 }
-                withContext(Dispatchers.Main) { onCameraOpen(camera) }
+                onCameraOpen(camera)
             } catch (t: Throwable) {
-                withContext(Dispatchers.Main) { cameraErrorListener.onCameraOpenError(t) }
+                cameraErrorListener.onCameraOpenError(t)
+            }
+        }
+
+        // For some devices (especially Samsung), we need to continuously refocus the camera.
+        focusJob = GlobalScope.launch {
+            while (true) {
+                delay(5000)
+                val variance = Random().nextFloat() - 0.5F
+                setFocus(PointF(
+                    previewView.width / 2F + variance,
+                    previewView.height / 2F + variance
+                ))
             }
         }
     }
@@ -131,7 +155,7 @@ class Camera1Adapter(
         try {
             camera.parameters = parameters
         } catch (t: Throwable) {
-            cameraErrorListener.onCameraAccessError(t)
+            // ignore failure to set camera parameters
         }
     }
 
@@ -230,7 +254,8 @@ class Camera1Adapter(
             for (size in sizes) {
                 val ratio = size.width.toDouble() / size.height
                 val ratioDiff = abs(ratio - targetRatio)
-                if (size.height >= h && ratioDiff <= minDiffRatio && size.height <= MAXIMUM_RESOLUTION.height && size.width <= MAXIMUM_RESOLUTION.width) {
+                if (size.height >= h && ratioDiff <= minDiffRatio &&
+                        size.height <= MAXIMUM_RESOLUTION.height && size.width <= MAXIMUM_RESOLUTION.width) {
                     optimalSize = size
                     minDiffRatio = ratioDiff
                 }
@@ -317,7 +342,7 @@ class Camera1Adapter(
          */
         override fun surfaceCreated(holder: SurfaceHolder) {
             try {
-                mCamera?.setPreviewDisplay(holder)
+                mCamera?.setPreviewDisplay(mHolder)
                 mCamera?.setPreviewCallbackWithBuffer(mPreviewCallback)
                 startCameraPreview()
             } catch (t: Throwable) {
