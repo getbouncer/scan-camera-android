@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.0.0010](https://github.com/getbouncer/scan-camera-android/tree/2.0.0010) (2020-05-30)
+
+[Full Changelog](https://github.com/getbouncer/scan-camera-android/compare/2.0.0009...2.0.0010)
+
+**Merged pull requests:**
+
+- Better support camera flash [\#21](https://github.com/getbouncer/scan-camera-android/pull/21) ([awushensky](https://github.com/awushensky))
+- Bump gradle from 3.6.3 to 4.0.0 [\#20](https://github.com/getbouncer/scan-camera-android/pull/20) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+
 ## [2.0.0009](https://github.com/getbouncer/scan-camera-android/tree/2.0.0009) (2020-05-29)
 
 [Full Changelog](https://github.com/getbouncer/scan-camera-android/compare/2.0.0008...2.0.0009)
