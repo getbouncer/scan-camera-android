@@ -31,6 +31,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.ref.WeakReference
 
 private const val ASPECT_TOLERANCE = 0.2
 
@@ -48,14 +49,14 @@ class Camera1Adapter(
     private var cameraPreview: CameraPreview? = null
     private var mRotation = 0
     private var focusJob: Job? = null
-    private var onCameraAvailableListener: ((Camera) -> Unit)? = null
+    private var onCameraAvailableListener: WeakReference<((Camera) -> Unit)?> = WeakReference(null)
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
         val camera = mCamera
         if (camera != null) {
             task(camera.parameters.supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_TORCH))
         } else {
-            onCameraAvailableListener = { cam ->
+            onCameraAvailableListener = WeakReference { cam ->
                 task(cam.parameters.supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_TORCH))
             }
         }
@@ -203,11 +204,10 @@ class Camera1Adapter(
             // Create our Preview view and set it as the content of our activity.
             cameraPreview = CameraPreview(activity, this)
             withContext(Dispatchers.Main) {
-                val listener = onCameraAvailableListener
-                if (listener != null) {
-                    listener(camera)
-                    onCameraAvailableListener = null
+                onCameraAvailableListener.get()?.let {
+                    it(camera)
                 }
+                onCameraAvailableListener.clear()
 
                 previewView.removeAllViews()
                 previewView.addView(cameraPreview)
