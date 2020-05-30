@@ -206,6 +206,7 @@ class Camera1Adapter(
                 val listener = onCameraAvailableListener
                 if (listener != null) {
                     listener(camera)
+                    onCameraAvailableListener = null
                 }
 
                 previewView.removeAllViews()
