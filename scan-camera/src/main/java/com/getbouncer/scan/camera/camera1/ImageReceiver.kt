@@ -6,9 +6,9 @@ import android.hardware.Camera
 import android.util.Size
 import com.getbouncer.scan.camera.FrameConverter
 import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
-import com.getbouncer.scan.framework.image.nv21ToYuv
-import com.getbouncer.scan.framework.image.scale
-import com.getbouncer.scan.framework.image.toBitmap
+import com.getbouncer.scan.framework.nv21ToYuv
+import com.getbouncer.scan.framework.scale
+import com.getbouncer.scan.framework.toBitmap
 import kotlin.math.max
 import kotlinx.coroutines.runBlocking
 
