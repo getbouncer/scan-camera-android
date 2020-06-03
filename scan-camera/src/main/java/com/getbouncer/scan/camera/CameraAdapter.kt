@@ -35,13 +35,17 @@ abstract class CameraAdapter : LifecycleObserver {
         internal fun calculateImageRotationDegrees(
             @RotationValue displayOrientation: Int,
             sensorRotationDegrees: Int
-        ) = ((when (displayOrientation) {
-            Surface.ROTATION_0 -> sensorRotationDegrees
-            Surface.ROTATION_90 -> sensorRotationDegrees - 90
-            Surface.ROTATION_180 -> sensorRotationDegrees - 180
-            Surface.ROTATION_270 -> sensorRotationDegrees - 270
-            else -> 0
-        } % 360) + 360) % 360
+        ) = (
+            (
+                when (displayOrientation) {
+                    Surface.ROTATION_0 -> sensorRotationDegrees
+                    Surface.ROTATION_90 -> sensorRotationDegrees - 90
+                    Surface.ROTATION_180 -> sensorRotationDegrees - 180
+                    Surface.ROTATION_270 -> sensorRotationDegrees - 270
+                    else -> 0
+                } % 360
+            ) + 360
+        ) % 360
 
         /**
          * Convert a size on the screen to a resolution.

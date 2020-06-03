@@ -3,8 +3,8 @@ package com.getbouncer.scan.camera
 import android.util.Size
 import android.view.Surface
 import androidx.test.filters.SmallTest
-import kotlin.test.assertEquals
 import org.junit.Test
+import kotlin.test.assertEquals
 
 class CameraAdapterInstrumentationTest {
 

@@ -20,18 +20,18 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
-import java.lang.ref.WeakReference
-import java.util.ArrayList
-import java.util.Random
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.lang.ref.WeakReference
+import java.util.ArrayList
+import java.util.Random
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 private const val ASPECT_TOLERANCE = 0.2
 
@@ -146,10 +146,12 @@ class Camera1Adapter(
             while (true) {
                 delay(5000)
                 val variance = Random().nextFloat() - 0.5F
-                setFocus(PointF(
-                    previewView.width / 2F + variance,
-                    previewView.height / 2F + variance
-                ))
+                setFocus(
+                    PointF(
+                        previewView.width / 2F + variance,
+                        previewView.height / 2F + variance
+                    )
+                )
             }
         }
     }
@@ -266,7 +268,8 @@ class Camera1Adapter(
                 val ratio = size.width.toDouble() / size.height
                 val ratioDiff = abs(ratio - targetRatio)
                 if (size.height >= h && ratioDiff <= minDiffRatio &&
-                        size.height <= MAXIMUM_RESOLUTION.height && size.width <= MAXIMUM_RESOLUTION.width) {
+                    size.height <= MAXIMUM_RESOLUTION.height && size.width <= MAXIMUM_RESOLUTION.width
+                ) {
                     optimalSize = size
                     minDiffRatio = ratioDiff
                 }
