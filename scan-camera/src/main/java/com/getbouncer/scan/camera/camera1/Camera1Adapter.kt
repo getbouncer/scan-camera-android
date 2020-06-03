@@ -129,7 +129,7 @@ class Camera1Adapter(
             try {
                 var camera: Camera? = null
                 try {
-                    withContext(Dispatchers.IO) {
+                    withContext(Dispatchers.Default) {
                         camera = Camera.open()
                     }
                 } catch (t: Throwable) {
