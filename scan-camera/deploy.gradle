@@ -13,7 +13,7 @@ ext {
 
     libraryDescription = 'This library provides the framework for integrating a camera into scan.'
 
-    siteUrl = 'https://github.com/getbouncer/scan-camera-android'
+    siteUrl = 'https://cardscan.io'
     gitUrl = 'https://github.com/getbouncer/scan-camera-android.git'
 
     libraryVersion = version
