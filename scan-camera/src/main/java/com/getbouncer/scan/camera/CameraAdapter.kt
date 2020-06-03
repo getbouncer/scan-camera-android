@@ -44,8 +44,8 @@ abstract class CameraAdapter : LifecycleObserver {
                     Surface.ROTATION_270 -> sensorRotationDegrees - 270
                     else -> 0
                 } % 360
-            ) + 360
-        ) % 360
+                ) + 360
+            ) % 360
 
         /**
          * Convert a size on the screen to a resolution.
