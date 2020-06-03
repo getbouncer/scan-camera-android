@@ -9,8 +9,8 @@ import com.getbouncer.scan.framework.ProcessBoundAnalyzerLoop
 import com.getbouncer.scan.framework.nv21ToYuv
 import com.getbouncer.scan.framework.scale
 import com.getbouncer.scan.framework.toBitmap
-import kotlin.math.max
 import kotlinx.coroutines.runBlocking
+import kotlin.math.max
 
 interface ImageReceiver {
     fun receiveImage(image: ByteArray, imageSize: Size, rotationDegrees: Int, camera: Camera)
@@ -23,8 +23,8 @@ class ImageReceiverAnalyzer<ImageFormat, State, Output>(
 ) : ImageReceiver {
     override fun receiveImage(image: ByteArray, imageSize: Size, rotationDegrees: Int, camera: Camera) {
         val scale = max(
-                analysisResolution.width.toFloat() / imageSize.width,
-                analysisResolution.height.toFloat() / imageSize.height
+            analysisResolution.width.toFloat() / imageSize.width,
+            analysisResolution.height.toFloat() / imageSize.height
         )
         val bitmap = image.nv21ToYuv(imageSize.width, imageSize.height).toBitmap().scale(scale)
         camera.addCallbackBuffer(image)
