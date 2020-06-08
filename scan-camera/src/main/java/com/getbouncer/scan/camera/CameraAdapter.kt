@@ -1,5 +1,7 @@
 package com.getbouncer.scan.camera
 
+import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.PointF
 import android.util.Size
 import android.view.Surface
@@ -24,6 +26,14 @@ private annotation class RotationValue
 abstract class CameraAdapter : LifecycleObserver {
 
     companion object {
+
+        /**
+         * Determine if the device supports the camera features used by this SDK.
+         */
+        @JvmStatic
+        fun isCameraSupported(context: Context): Boolean =
+            context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA) &&
+                context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_AUTOFOCUS)
 
         /**
          * Determine how much to rotate the image from the camera given the orientation of the
