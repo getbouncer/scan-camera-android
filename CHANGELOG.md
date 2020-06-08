@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.0.0011](https://github.com/getbouncer/scan-camera-android/tree/2.0.0011) (2020-06-08)
+
+[Full Changelog](https://github.com/getbouncer/scan-camera-android/compare/2.0.0010...2.0.0011)
+
+**Merged pull requests:**
+
+- Use default dispatcher for camera [\#25](https://github.com/getbouncer/scan-camera-android/pull/25) ([awushensky](https://github.com/awushensky))
+- Bump ktlint from 0.36.0 to 0.37.0 [\#24](https://github.com/getbouncer/scan-camera-android/pull/24) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Update submodule [\#23](https://github.com/getbouncer/scan-camera-android/pull/23) ([xsl](https://github.com/xsl))
+- Update image utils [\#22](https://github.com/getbouncer/scan-camera-android/pull/22) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0010](https://github.com/getbouncer/scan-camera-android/tree/2.0.0010) (2020-05-30)
 
 [Full Changelog](https://github.com/getbouncer/scan-camera-android/compare/2.0.0009...2.0.0010)
