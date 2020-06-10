@@ -1,3 +1,2 @@
-include ':scan-camera', ':scan-framework'
+include ':scan-camera'
 rootProject.name='scan-camera-android'
-project(':scan-framework').projectDir = new File('scan-framework-android/scan-framework')
