@@ -17,7 +17,7 @@ class ImageTest {
 
     @Test
     @SmallTest
-    fun bitmap_scalePercent_isCorrect() {
+    fun bitmap_scale_isCorrect() {
         // read in a sample bitmap file
         val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
         assertNotNull(bitmap)
@@ -26,36 +26,6 @@ class ImageTest {
 
         // scale the bitmap
         val scaledBitmap = bitmap.scale(0.5F)
-
-        // check the expected sizes of the images
-        assertEquals(
-            Size(bitmap.width / 5, bitmap.height / 5),
-            Size(scaledBitmap.width, scaledBitmap.height),
-            "Scaled image is the wrong size"
-        )
-
-        // check each pixel of the images
-        var encounteredNonZeroPixel = false
-        for (x in 0 until scaledBitmap.width) {
-            for (y in 0 until scaledBitmap.height) {
-                encounteredNonZeroPixel = encounteredNonZeroPixel || scaledBitmap.getPixel(x, y) != 0
-            }
-        }
-
-        assertTrue(encounteredNonZeroPixel, "Pixels were all zero")
-    }
-
-    @Test
-    @SmallTest
-    fun bitmap_scaleSize_isCorrect() {
-        // read in a sample bitmap file
-        val bitmap = testResources.getDrawable(R.drawable.ocr_card_numbers_clear, null).toBitmap()
-        assertNotNull(bitmap)
-        assertEquals(600, bitmap.width, "Bitmap width is not expected")
-        assertEquals(375, bitmap.height, "Bitmap height is not expected")
-
-        // scale the bitmap
-        val scaledBitmap = bitmap.scale(Size(bitmap.width / 5, bitmap.height / 5))
 
         // check the expected sizes of the images
         assertEquals(
