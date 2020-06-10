@@ -25,7 +25,7 @@ class ImageTest {
         assertEquals(375, bitmap.height, "Bitmap height is not expected")
 
         // scale the bitmap
-        val scaledBitmap = bitmap.scale(0.5F)
+        val scaledBitmap = bitmap.scale(0.2F)
 
         // check the expected sizes of the images
         assertEquals(

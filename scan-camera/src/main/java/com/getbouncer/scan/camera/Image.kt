@@ -173,14 +173,13 @@ fun Bitmap.rotate(rotationDegrees: Float): Bitmap = if (rotationDegrees != 0F) {
     this
 }
 
-fun Bitmap.scale(percentage: Float, filter: Boolean = false): Bitmap =
-    if (percentage == 1F) {
-        this
-    } else {
-        Bitmap.createScaledBitmap(
-            this,
-            (width * percentage).toInt(),
-            (height * percentage).toInt(),
-            filter
-        )
-    }
+fun Bitmap.scale(percentage: Float, filter: Boolean = false): Bitmap = if (percentage == 1F) {
+    this
+} else {
+    Bitmap.createScaledBitmap(
+        this,
+        (width * percentage).toInt(),
+        (height * percentage).toInt(),
+        filter
+    )
+}
