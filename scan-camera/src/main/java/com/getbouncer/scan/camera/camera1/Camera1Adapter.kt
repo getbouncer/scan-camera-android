@@ -4,6 +4,7 @@ package com.getbouncer.scan.camera.camera1
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.graphics.PointF
 import android.graphics.Rect
@@ -20,11 +21,20 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
+import com.getbouncer.scan.camera.FrameConverter
+import com.getbouncer.scan.camera.nv21ToYuv
+import com.getbouncer.scan.camera.scale
+import com.getbouncer.scan.camera.toBitmap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import java.util.ArrayList
@@ -37,19 +47,22 @@ private const val ASPECT_TOLERANCE = 0.2
 
 private val MAXIMUM_RESOLUTION = Size(1920, 1080)
 
-class Camera1Adapter(
+class Camera1Adapter<ImageType>(
     private val activity: Activity,
     private val previewView: FrameLayout,
     private val minimumResolution: Size,
-    private val imageReceiver: ImageReceiver,
+    private val frameConverter: FrameConverter<Bitmap, ImageType>,
     private val cameraErrorListener: CameraErrorListener
-) : CameraAdapter(), PreviewCallback {
+) : CameraAdapter<ImageType>(), PreviewCallback {
 
     private var mCamera: Camera? = null
     private var cameraPreview: CameraPreview? = null
     private var mRotation = 0
     private var focusJob: Job? = null
     private var onCameraAvailableListener: WeakReference<((Camera) -> Unit)?> = WeakReference(null)
+
+    private val imageChannel = Channel<ImageType>(Channel.RENDEZVOUS)
+    private val imageReceiveMutex = Mutex()
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
         val camera = mCamera
@@ -98,13 +111,31 @@ class Camera1Adapter(
         }
     }
 
+    @ExperimentalCoroutinesApi
     override fun onPreviewFrame(bytes: ByteArray, camera: Camera) {
-        imageReceiver.receiveImage(
-            image = bytes,
-            imageSize = Size(camera.parameters.previewSize.width, camera.parameters.previewSize.height),
-            rotationDegrees = mRotation,
-            camera = camera
+        val imageWidth = camera.parameters.previewSize.width
+        val imageHeight = camera.parameters.previewSize.height
+        val scale = max(
+            minimumResolution.width.toFloat() / imageWidth,
+            minimumResolution.height.toFloat() / imageHeight
         )
+        val bitmap = bytes.nv21ToYuv(imageWidth, imageHeight).toBitmap().scale(scale)
+        camera.addCallbackBuffer(bytes)
+
+        val frame = frameConverter.convert(bitmap, mRotation)
+
+        runBlocking {
+            imageReceiveMutex.withLock {
+                if (imageChannel.isClosedForReceive || imageChannel.isClosedForSend) {
+                    return@runBlocking
+                }
+                val existingImage = imageChannel.poll()
+                if (existingImage != null) {
+                    imageChannel.receive()
+                }
+                imageChannel.offer(frame)
+            }
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -154,6 +185,11 @@ class Camera1Adapter(
                 )
             }
         }
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    fun onDestroy() {
+        imageChannel.close()
     }
 
     private fun setCameraParameters(
@@ -405,4 +441,6 @@ class Camera1Adapter(
             }
         }
     }
+
+    override fun getImageStream(): Channel<ImageType> = imageChannel
 }
