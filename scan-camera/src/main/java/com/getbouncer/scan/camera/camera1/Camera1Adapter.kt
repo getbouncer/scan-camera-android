@@ -29,12 +29,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.lang.ref.WeakReference
 import java.util.ArrayList
@@ -51,18 +47,15 @@ class Camera1Adapter<ImageType>(
     private val activity: Activity,
     private val previewView: FrameLayout,
     private val minimumResolution: Size,
-    private val frameConverter: FrameConverter<Bitmap, ImageType>,
+    frameConverter: FrameConverter<Bitmap, ImageType>,
     private val cameraErrorListener: CameraErrorListener
-) : CameraAdapter<ImageType>(), PreviewCallback {
+) : CameraAdapter<Bitmap, ImageType>(frameConverter), PreviewCallback {
 
     private var mCamera: Camera? = null
     private var cameraPreview: CameraPreview? = null
     private var mRotation = 0
     private var focusJob: Job? = null
     private var onCameraAvailableListener: WeakReference<((Camera) -> Unit)?> = WeakReference(null)
-
-    private val imageChannel = Channel<ImageType>(Channel.RENDEZVOUS)
-    private val imageReceiveMutex = Mutex()
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
         val camera = mCamera
@@ -122,20 +115,7 @@ class Camera1Adapter<ImageType>(
         val bitmap = bytes.nv21ToYuv(imageWidth, imageHeight).toBitmap().scale(scale)
         camera.addCallbackBuffer(bytes)
 
-        val frame = frameConverter.convert(bitmap, mRotation)
-
-        runBlocking {
-            imageReceiveMutex.withLock {
-                if (imageChannel.isClosedForReceive || imageChannel.isClosedForSend) {
-                    return@runBlocking
-                }
-                val existingImage = imageChannel.poll()
-                if (existingImage != null) {
-                    imageChannel.receive()
-                }
-                imageChannel.offer(frame)
-            }
-        }
+        addImageToChannel(bitmap, mRotation)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -185,11 +165,6 @@ class Camera1Adapter<ImageType>(
                 )
             }
         }
-    }
-
-    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-    fun onDestroy() {
-        imageChannel.close()
     }
 
     private fun setCameraParameters(
@@ -385,7 +360,7 @@ class Camera1Adapter<ImageType>(
             }
         }
 
-        override fun onAutoFocus(success: Boolean, camera: Camera) { }
+        override fun onAutoFocus(success: Boolean, camera: Camera) {}
 
         /**
          * The Surface has been created, now tell the camera where to draw the preview.
@@ -441,6 +416,4 @@ class Camera1Adapter<ImageType>(
             }
         }
     }
-
-    override fun getImageStream(): Channel<ImageType> = imageChannel
 }

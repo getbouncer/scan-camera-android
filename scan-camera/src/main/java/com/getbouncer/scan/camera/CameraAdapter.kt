@@ -6,9 +6,15 @@ import android.graphics.PointF
 import android.util.Size
 import android.view.Surface
 import androidx.annotation.IntDef
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.OnLifecycleEvent
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.math.max
 import kotlin.math.min
 
@@ -24,7 +30,12 @@ import kotlin.math.min
 @Retention(AnnotationRetention.SOURCE)
 private annotation class RotationValue
 
-abstract class CameraAdapter<ImageType> : LifecycleObserver {
+abstract class CameraAdapter<CameraOutput, ImageType>(
+    private val frameConverter: FrameConverter<CameraOutput, ImageType>
+) : LifecycleObserver {
+
+    private val imageChannel = Channel<ImageType>(Channel.RENDEZVOUS)
+    private val imageReceiveMutex = Mutex()
 
     companion object {
 
@@ -102,6 +113,33 @@ abstract class CameraAdapter<ImageType> : LifecycleObserver {
         }
     }
 
+    @ExperimentalCoroutinesApi
+    internal fun addImageToChannel(image: CameraOutput, rotationDegrees: Int) {
+        val frame = frameConverter.convert(image, rotationDegrees)
+
+        runBlocking {
+            imageReceiveMutex.withLock {
+                if (imageChannel.isClosedForReceive || imageChannel.isClosedForSend) {
+                    return@runBlocking
+                }
+                val existingImage = imageChannel.poll()
+                if (existingImage != null) {
+                    imageChannel.receive()
+                }
+                imageChannel.offer(frame)
+            }
+        }
+    }
+
+    @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+    fun onDestroy() {
+        runBlocking {
+            imageReceiveMutex.withLock {
+                imageChannel.close()
+            }
+        }
+    }
+
     /**
      * Bind this camera manager to a lifecycle.
      */
@@ -132,7 +170,7 @@ abstract class CameraAdapter<ImageType> : LifecycleObserver {
     /**
      * Get the stream of images from the camera.
      */
-    abstract fun getImageStream(): Channel<ImageType>
+    fun getImageStream() = imageChannel
 }
 
 interface CameraErrorListener {
