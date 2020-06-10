@@ -8,6 +8,7 @@ import android.view.Surface
 import androidx.annotation.IntDef
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import kotlinx.coroutines.channels.Channel
 import kotlin.math.max
 import kotlin.math.min
 
@@ -23,7 +24,7 @@ import kotlin.math.min
 @Retention(AnnotationRetention.SOURCE)
 private annotation class RotationValue
 
-abstract class CameraAdapter : LifecycleObserver {
+abstract class CameraAdapter<ImageType> : LifecycleObserver {
 
     companion object {
 
@@ -127,6 +128,11 @@ abstract class CameraAdapter : LifecycleObserver {
      * Set the focus on a particular point on the screen.
      */
     abstract fun setFocus(point: PointF)
+
+    /**
+     * Get the stream of images from the camera.
+     */
+    abstract fun getImageStream(): Channel<ImageType>
 }
 
 interface CameraErrorListener {
