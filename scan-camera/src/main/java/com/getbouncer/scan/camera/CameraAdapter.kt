@@ -30,11 +30,9 @@ import kotlin.math.min
 @Retention(AnnotationRetention.SOURCE)
 private annotation class RotationValue
 
-abstract class CameraAdapter<CameraOutput, ImageType>(
-    private val frameConverter: FrameConverter<CameraOutput, ImageType>
-) : LifecycleObserver {
+abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
-    private val imageChannel = Channel<ImageType>(Channel.RENDEZVOUS)
+    private val imageChannel = Channel<CameraOutput>(Channel.RENDEZVOUS)
     private val imageReceiveMutex = Mutex()
 
     companion object {
@@ -114,9 +112,7 @@ abstract class CameraAdapter<CameraOutput, ImageType>(
     }
 
     @ExperimentalCoroutinesApi
-    internal fun addImageToChannel(image: CameraOutput, rotationDegrees: Int) {
-        val frame = frameConverter.convert(image, rotationDegrees)
-
+    internal fun addImageToChannel(image: CameraOutput) {
         runBlocking {
             imageReceiveMutex.withLock {
                 if (imageChannel.isClosedForReceive || imageChannel.isClosedForSend) {
@@ -126,7 +122,7 @@ abstract class CameraAdapter<CameraOutput, ImageType>(
                 if (existingImage != null) {
                     imageChannel.receive()
                 }
-                imageChannel.offer(frame)
+                imageChannel.offer(image)
             }
         }
     }

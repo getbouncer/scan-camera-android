@@ -47,8 +47,8 @@ import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
-import com.getbouncer.scan.camera.FrameConverter
 import com.getbouncer.scan.camera.isSupportedFormat
+import com.getbouncer.scan.camera.rotate
 import com.getbouncer.scan.camera.scale
 import com.getbouncer.scan.camera.toBitmap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -92,13 +92,12 @@ class CameraConfigurationFailedException(val cameraId: String) : Exception()
 /**
  * A [CameraAdapter] that uses android's Camera 2 APIs to show previews and process images.
  */
-class Camera2Adapter<ImageType>(
+class Camera2Adapter(
     private val activity: Activity,
     private val previewView: TextureView?,
     private val minimumResolution: Size,
-    frameConverter: FrameConverter<Bitmap, ImageType>,
     private val cameraErrorListener: CameraErrorListener
-) : CameraAdapter<Bitmap, ImageType>(frameConverter), LifecycleObserver {
+) : CameraAdapter<Bitmap>(), LifecycleObserver {
 
     companion object {
         /**
@@ -291,23 +290,26 @@ class Camera2Adapter<ImageType>(
 
                                 val bitmap = reader?.acquireLatestImage()?.use {
                                     if (it.isSupportedFormat()) {
-                                        val scale = max(
-                                            minimumResolution.width.toFloat() / it.width,
-                                            minimumResolution.height.toFloat() / it.height
-                                        )
-                                        it.toBitmap().scale(scale)
+                                        it
+                                            .toBitmap()
+                                            .scale(
+                                                max(
+                                                minimumResolution.width.toFloat() / it.width,
+                                                minimumResolution.height.toFloat() / it.height
+                                                )
+                                            )
+                                            .rotate(
+                                                calculateImageRotationDegrees(
+                                                    displayRotation,
+                                                    sensorRotation
+                                                ).toFloat()
+                                            )
                                     } else {
                                         null
                                     }
                                 }
 
-                                bitmap?.let {
-                                    addImageToChannel(
-                                        image = it,
-                                        rotationDegrees = calculateImageRotationDegrees(displayRotation, sensorRotation)
-                                    )
-                                }
-
+                                bitmap?.let { addImageToChannel(it) }
                                 processingImage.set(false)
                             }
                         },

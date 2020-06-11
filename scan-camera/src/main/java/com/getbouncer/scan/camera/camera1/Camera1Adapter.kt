@@ -21,8 +21,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.OnLifecycleEvent
 import com.getbouncer.scan.camera.CameraAdapter
 import com.getbouncer.scan.camera.CameraErrorListener
-import com.getbouncer.scan.camera.FrameConverter
 import com.getbouncer.scan.camera.nv21ToYuv
+import com.getbouncer.scan.camera.rotate
 import com.getbouncer.scan.camera.scale
 import com.getbouncer.scan.camera.toBitmap
 import kotlinx.coroutines.Dispatchers
@@ -46,13 +46,12 @@ private val MAXIMUM_RESOLUTION = Size(1920, 1080)
 /**
  * A [CameraAdapter] that uses android's Camera 1 APIs to show previews and process images.
  */
-class Camera1Adapter<ImageType>(
+class Camera1Adapter(
     private val activity: Activity,
     private val previewView: FrameLayout,
     private val minimumResolution: Size,
-    frameConverter: FrameConverter<Bitmap, ImageType>,
     private val cameraErrorListener: CameraErrorListener
-) : CameraAdapter<Bitmap, ImageType>(frameConverter), PreviewCallback {
+) : CameraAdapter<Bitmap>(), PreviewCallback {
 
     private var mCamera: Camera? = null
     private var cameraPreview: CameraPreview? = null
@@ -110,10 +109,10 @@ class Camera1Adapter<ImageType>(
             minimumResolution.width.toFloat() / imageWidth,
             minimumResolution.height.toFloat() / imageHeight
         )
-        val bitmap = bytes.nv21ToYuv(imageWidth, imageHeight).toBitmap().scale(scale)
+        val bitmap = bytes.nv21ToYuv(imageWidth, imageHeight).toBitmap().scale(scale).rotate(mRotation.toFloat())
         camera.addCallbackBuffer(bytes)
 
-        addImageToChannel(bitmap, mRotation)
+        addImageToChannel(bitmap)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
