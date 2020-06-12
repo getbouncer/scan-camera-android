@@ -111,9 +111,9 @@ class Camera2Adapter(
             // the maximum resolution.
             val allowedCameraSizes = cameraSizes.filter {
                 it.second.width <= MAX_RESOLUTION_WIDTH &&
-                        it.second.height <= MAX_RESOLUTION_HEIGHT &&
-                        it.second.width >= minimumResolution.width &&
-                        it.second.height >= minimumResolution.height
+                    it.second.height <= MAX_RESOLUTION_HEIGHT &&
+                    it.second.width >= minimumResolution.width &&
+                    it.second.height >= minimumResolution.height
             }
 
             return allowedCameraSizes.minBy {
@@ -293,8 +293,8 @@ class Camera2Adapter(
                                             .toBitmap()
                                             .scale(
                                                 max(
-                                                minimumResolution.width.toFloat() / it.width,
-                                                minimumResolution.height.toFloat() / it.height
+                                                    minimumResolution.width.toFloat() / it.width,
+                                                    minimumResolution.height.toFloat() / it.height
                                                 )
                                             )
                                             .rotate(
@@ -580,22 +580,26 @@ class Camera2Adapter(
         previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START)
         previewRequestBuilder.setTag("FOCUS_TAG") // we'll capture this later for resuming the preview
 
-        previewCaptureSession?.capture(previewRequestBuilder.build(), object : CameraCaptureSession.CaptureCallback() {
-            override fun onCaptureCompleted(
-                session: CameraCaptureSession,
-                request: CaptureRequest,
-                result: TotalCaptureResult
-            ) {
-                super.onCaptureCompleted(session, request, result)
+        previewCaptureSession?.capture(
+            previewRequestBuilder.build(),
+            object : CameraCaptureSession.CaptureCallback() {
+                override fun onCaptureCompleted(
+                    session: CameraCaptureSession,
+                    request: CaptureRequest,
+                    result: TotalCaptureResult
+                ) {
+                    super.onCaptureCompleted(session, request, result)
 
-                if (request.tag == "FOCUS_TAG") {
-                    // the focus trigger is complete -
-                    // resume repeating (preview surface will get frames), clear AF trigger
-                    previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
-                    previewCaptureSession?.setRepeatingRequest(previewRequestBuilder.build(), null, cameraHandler)
+                    if (request.tag == "FOCUS_TAG") {
+                        // the focus trigger is complete -
+                        // resume repeating (preview surface will get frames), clear AF trigger
+                        previewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, null)
+                        previewCaptureSession?.setRepeatingRequest(previewRequestBuilder.build(), null, cameraHandler)
+                    }
                 }
-            }
-        }, cameraHandler)
+            },
+            cameraHandler
+        )
     }
 
     private fun isMeteringAreaAFSupported(): Boolean {
