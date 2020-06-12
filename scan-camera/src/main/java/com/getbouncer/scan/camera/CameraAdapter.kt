@@ -146,7 +146,8 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
     abstract fun setFocus(point: PointF)
 
     /**
-     * Get the stream of images from the camera.
+     * Get the stream of images from the camera. This is a hot [Flow] of images with a back pressure strategy DROP.
+     * Images that are not read from the flow are dropped. This flow is backed by a [Channel].
      */
     fun getImageStream(): Flow<CameraOutput> = imageChannel.receiveAsFlow()
 }
