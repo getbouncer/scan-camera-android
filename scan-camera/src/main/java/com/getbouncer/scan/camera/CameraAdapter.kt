@@ -31,7 +31,8 @@ private annotation class RotationValue
 
 abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
-    private val imageChannel = Channel<CameraOutput>(Channel.RENDEZVOUS)
+    // TODO: change this to be a channelFlow once it's no longer experimental
+    private val imageChannel = Channel<CameraOutput>(capacity = 2)
 
     companion object {
 
