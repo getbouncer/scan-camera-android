@@ -33,8 +33,7 @@ Theses libraries are published in the [jcenter](https://jcenter.bintray.com/com/
 
 ```gradle
 dependencies {
-    implementation 'com.getbouncer:scan-framework:2.0.0011'
-    implementation 'com.getbouncer:scan-camera:2.0.0011'
+    implementation 'com.getbouncer:scan-camera:2.0.0012'
 }
 ```
 
@@ -49,24 +48,25 @@ For an overview of the architecture and design of the scan framework, see the [a
 Let's use an example where we stream images from the camera.
 
 ```kotlin
-class MyCameraAnalyzer : AppCompatActivity(), OnImageAvailableListener, CameraErrorListener {
+class MyCameraAnalyzer : AppCompatActivity(), CameraErrorListener {
+
+    private val cameraAdapter by lazy {
+        Camera2Adapter(
+            activity = this,
+            previewView = textureView, // A TextureView  where preview with display. If null, no preview will be shown.
+            minimumResolution = MINIMUM_RESOLUTION, // the minimum image resolution that should be streamed.
+            cameraErrorListener = this
+        )
+    }
     
     /**
      * Call this method to start streaming images from the camera.
      */
     fun startStreamingCamera() {
-        Camera2Adapter(
-            activity = this,
-            onImageAvailableListener = this,  // An image listener. If null, images will not be captured.
-            minimumResolution = MINIMUM_RESOLUTION,
-            cameraErrorListener = this,
-            cameraTexture = cameraTexture  // A TextureView where the previews should be shown. If this is null, no preview will be shown.
-        ).bindToLifecycle(this)
+        cameraAdapter.bindToLifecycle(this)
     }
 
-    override fun onBitmapAvailable(bitmap: Bitmap) {
-        // A camera image is available
-    }
+    fun getCameraImageStream() = cameraAdapter.getImageStream()
 
     override fun onCameraOpenError(cause: Throwable?) {
         // The camera could not be opened
