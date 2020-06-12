@@ -253,7 +253,6 @@ class Camera2Adapter(
     /**
      * Sets up member variables related to camera.
      */
-    @ExperimentalCoroutinesApi
     private fun setUpCameraOutputs() {
         try {
             getAvailableCameras().firstOrNull()?.also { cameraDetails ->
@@ -309,7 +308,7 @@ class Camera2Adapter(
                                     }
                                 }
 
-                                bitmap?.let { addImageToChannel(it) }
+                                bitmap?.let { sendImageToStream(it) }
                                 processingImage.set(false)
                             }
                         },
@@ -397,7 +396,6 @@ class Camera2Adapter(
     /**
      * Opens the camera specified by [cameraId].
      */
-    @ExperimentalCoroutinesApi
     @SuppressLint("MissingPermission")
     private fun openCamera() {
         setUpCameraOutputs()

@@ -71,6 +71,7 @@ class Camera1Adapter(
 
     override fun setTorchState(on: Boolean) {
         mCamera?.apply {
+            val parameters = parameters
             if (on) {
                 parameters.flashMode = Camera.Parameters.FLASH_MODE_TORCH
             } else {
@@ -86,6 +87,7 @@ class Camera1Adapter(
 
     override fun setFocus(point: PointF) {
         mCamera?.apply {
+            val parameters = parameters
             if (parameters.maxNumFocusAreas > 0) {
                 val focusRect = Rect(
                     point.x.toInt() - 150,
@@ -112,7 +114,7 @@ class Camera1Adapter(
         val bitmap = bytes.nv21ToYuv(imageWidth, imageHeight).toBitmap().scale(scale).rotate(mRotation.toFloat())
         camera.addCallbackBuffer(bytes)
 
-        addImageToChannel(bitmap)
+        sendImageToStream(bitmap)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -220,21 +222,22 @@ class Camera1Adapter(
     }
 
     private fun setCameraPreviewFrame() {
-        val camera = mCamera ?: return
-        val format = ImageFormat.NV21
-        val parameters: Camera.Parameters = camera.parameters
-        parameters.previewFormat = format
-        val displayMetrics = DisplayMetrics()
-        activity.windowManager.defaultDisplay.getRealMetrics(displayMetrics)
-        val displayWidth = max(displayMetrics.heightPixels, displayMetrics.widthPixels)
-        val displayHeight = min(displayMetrics.heightPixels, displayMetrics.widthPixels)
-        val height: Int = minimumResolution.height
-        val width = displayWidth * height / displayHeight
-        getOptimalPreviewSize(parameters.supportedPreviewSizes, width, height)?.apply {
-            parameters.setPreviewSize(this.width, this.height)
-        }
+        mCamera?.apply {
+            val format = ImageFormat.NV21
+            val parameters = parameters
+            parameters.previewFormat = format
+            val displayMetrics = DisplayMetrics()
+            activity.windowManager.defaultDisplay.getRealMetrics(displayMetrics)
+            val displayWidth = max(displayMetrics.heightPixels, displayMetrics.widthPixels)
+            val displayHeight = min(displayMetrics.heightPixels, displayMetrics.widthPixels)
+            val height: Int = minimumResolution.height
+            val width = displayWidth * height / displayHeight
+            getOptimalPreviewSize(parameters.supportedPreviewSizes, width, height)?.apply {
+                parameters.setPreviewSize(this.width, this.height)
+            }
 
-        setCameraParameters(camera, parameters)
+            setCameraParameters(this, parameters)
+        }
     }
 
     private fun getOptimalPreviewSize(
@@ -332,6 +335,7 @@ class Camera1Adapter(
         init {
             mHolder.addCallback(this)
             mCamera?.apply {
+                val parameters = parameters
                 val focusModes = parameters.supportedFocusModes
                 if (focusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
                     parameters.focusMode = Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE

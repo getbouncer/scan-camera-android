@@ -66,7 +66,7 @@ class MyCameraAnalyzer : AppCompatActivity(), CameraErrorListener {
         cameraAdapter.bindToLifecycle(this)
     }
 
-    fun getCameraImageStream(): Channel<Bitmap> = cameraAdapter.getImageStream()
+    fun getCameraImageStream() = cameraAdapter.getImageStream()
 
     override fun onCameraOpenError(cause: Throwable?) {
         // The camera could not be opened

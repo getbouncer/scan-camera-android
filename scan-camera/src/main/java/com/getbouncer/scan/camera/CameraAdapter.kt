@@ -10,11 +10,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlin.math.max
 import kotlin.math.min
 
@@ -33,7 +32,6 @@ private annotation class RotationValue
 abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
 
     private val imageChannel = Channel<CameraOutput>(Channel.RENDEZVOUS)
-    private val imageReceiveMutex = Mutex()
 
     companion object {
 
@@ -111,29 +109,13 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
         }
     }
 
-    @ExperimentalCoroutinesApi
-    internal fun addImageToChannel(image: CameraOutput) {
-        runBlocking {
-            imageReceiveMutex.withLock {
-                if (imageChannel.isClosedForReceive || imageChannel.isClosedForSend) {
-                    return@runBlocking
-                }
-                val existingImage = imageChannel.poll()
-                if (existingImage != null) {
-                    imageChannel.receive()
-                }
-                imageChannel.offer(image)
-            }
-        }
+    protected fun sendImageToStream(image: CameraOutput) {
+        runBlocking { imageChannel.offer(image) }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun onDestroy() {
-        runBlocking {
-            imageReceiveMutex.withLock {
-                imageChannel.close()
-            }
-        }
+        runBlocking { imageChannel.close() }
     }
 
     /**
@@ -166,7 +148,7 @@ abstract class CameraAdapter<CameraOutput> : LifecycleObserver {
     /**
      * Get the stream of images from the camera.
      */
-    fun getImageStream() = imageChannel
+    fun getImageStream(): Flow<CameraOutput> = imageChannel.receiveAsFlow()
 }
 
 interface CameraErrorListener {
