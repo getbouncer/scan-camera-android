@@ -60,14 +60,17 @@ class Camera1Adapter(
     private var onCameraAvailableListener: WeakReference<((Camera) -> Unit)?> = WeakReference(null)
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
-        mCamera?.apply {
-            task(parameters.supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_TORCH))
+        mCamera?.let {
+            task(isFlashSupported(it))
         } ?: run {
             onCameraAvailableListener = WeakReference { cam ->
-                task(cam.parameters.supportedFlashModes.contains(Camera.Parameters.FLASH_MODE_TORCH))
+                task(isFlashSupported(cam))
             }
         }
     }
+
+    private fun isFlashSupported(camera: Camera) =
+        camera.parameters?.supportedFlashModes?.contains(Camera.Parameters.FLASH_MODE_TORCH) == true
 
     override fun setTorchState(on: Boolean) {
         mCamera?.apply {
