@@ -66,6 +66,9 @@ class MyCameraAnalyzer : AppCompatActivity(), CameraErrorListener {
         cameraAdapter.bindToLifecycle(this)
     }
 
+    /**
+     * Call this method to get a stream of images from the camera.
+     */
     fun getCameraImageStream() = cameraAdapter.getImageStream()
 
     override fun onCameraOpenError(cause: Throwable?) {
