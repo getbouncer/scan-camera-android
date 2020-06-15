@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.0.0012](https://github.com/getbouncer/scan-camera-android/tree/2.0.0012) (2020-06-15)
+
+[Full Changelog](https://github.com/getbouncer/scan-camera-android/compare/2.0.0011...2.0.0012)
+
+**Merged pull requests:**
+
+- Fix camera crash on flash not supported [\#30](https://github.com/getbouncer/scan-camera-android/pull/30) ([awushensky](https://github.com/awushensky))
+- Increase the channel buffer size to 2 [\#29](https://github.com/getbouncer/scan-camera-android/pull/29) ([awushensky](https://github.com/awushensky))
+- Reintroduce camera2 [\#28](https://github.com/getbouncer/scan-camera-android/pull/28) ([awushensky](https://github.com/awushensky))
+- Centralize the channel logic [\#27](https://github.com/getbouncer/scan-camera-android/pull/27) ([awushensky](https://github.com/awushensky))
+- Remove framework submodule [\#26](https://github.com/getbouncer/scan-camera-android/pull/26) ([awushensky](https://github.com/awushensky))
+
 ## [2.0.0011](https://github.com/getbouncer/scan-camera-android/tree/2.0.0011) (2020-06-08)
 
 [Full Changelog](https://github.com/getbouncer/scan-camera-android/compare/2.0.0010...2.0.0011)
