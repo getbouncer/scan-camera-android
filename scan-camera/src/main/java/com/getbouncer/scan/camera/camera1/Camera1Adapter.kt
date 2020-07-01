@@ -139,7 +139,7 @@ class Camera1Adapter(
             try {
                 var camera: Camera? = null
                 try {
-                    withContext(Dispatchers.Default) {
+                    withContext(Dispatchers.IO) {
                         camera = Camera.open()
                     }
                 } catch (t: Throwable) {
@@ -178,7 +178,7 @@ class Camera1Adapter(
     }
 
     private fun startCameraPreview() {
-        GlobalScope.launch(Dispatchers.Default) {
+        GlobalScope.launch(Dispatchers.IO) {
             startCameraPreviewInternal(0, 5, null)
         }
     }
