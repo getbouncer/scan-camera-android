@@ -33,7 +33,7 @@ Theses libraries are published in the [jcenter](https://jcenter.bintray.com/com/
 
 ```gradle
 dependencies {
-    implementation 'com.getbouncer:scan-camera:2.0.0012'
+    implementation 'com.getbouncer:scan-camera:2.0.0013'
 }
 ```
 
