@@ -1,35 +1,30 @@
 # Overview
-
 This repository contains the camera framework to allow scanning cards. [CardScan](https://cardscan.io/) is a relatively small library (1.9 MB) that provides fast and accurate payment card scanning.
 
 Note this library does not contain any user interfaces. Another library, [CardScan UI](https://github.com/getbouncer/cardscan-ui-android) builds upon this one any adds simple user interfaces. 
 
-![demo](docs/images/demo.png)
+![demo](docs/images/demo.gif)
 
 ## Contents
-
 * [Requirements](#requirements)
 * [Demo](#demo)
-* [Installation](#installation)
-* [Using this library](#using-this-library)
-* [Developing this library](#developing-this-library)
+* [Integration](#integration)
+* [Using](#using)
+* [Developing](#developing)
 * [Authors](#authors)
 * [License](#license)
 
 ## Requirements
-
 * Android API level 21 or higher
 * Kotlin coroutine compatibility
 
 Note: Your app does not have to be written in kotlin to integrate scan-camera, but must be able to depend on kotlin functionality.
 
 ## Demo
+An app demonstrating the basic capabilities of CardScan is available in [github](https://github.com/getbouncer/cardscan-demo-android).
 
-An app demonstrating the basic capabilities of scan-camera is available in [github](https://github.com/getbouncer/cardscan-demo-android).
-
-## Installation
-
-Theses libraries are published in the [jcenter](https://jcenter.bintray.com/com/getbouncer/) repository, so for most gradle configurations you only need to add the dependencies to your app's `build.gradle` file:
+## Integration
+This library is published in the [jcenter](https://jcenter.bintray.com/com/getbouncer/) repository, so for most gradle configurations you only need to add the dependencies to your app's `build.gradle` file:
 
 ```gradle
 dependencies {
@@ -37,64 +32,21 @@ dependencies {
 }
 ```
 
-## Using this library
-
+## Using
 This library is designed to be used with [CardScan UI](https://github.com/getbouncer/cardscan-ui-android), which will provide user interfaces for scanning payment cards. However, it can be used independently.
 
-For an overview of the architecture and design of the scan framework, see the [architecture documentation](https://github.com/getbouncer/scan-framework-android/blob/master/docs/architecture.md).
+For an overview of the architecture and design of the scan framework, see the [architecture documentation](https://docs.getbouncer.com/card-scan/android-integration-guide/android-architecture-overview).
 
 ### Getting images from the camera
+See the [example code](https://docs.getbouncer.com/card-scan/android-integration-guide/android-architecture-overview#example) in the Android architecture documentation.
 
-Let's use an example where we stream images from the camera.
-
-```kotlin
-class MyCameraAnalyzer : AppCompatActivity(), CameraErrorListener {
-
-    private val cameraAdapter by lazy {
-        Camera2Adapter(
-            activity = this,
-            previewView = textureView, // A TextureView  where preview with display. If null, no preview will be shown.
-            minimumResolution = MINIMUM_RESOLUTION, // the minimum image resolution that should be streamed.
-            cameraErrorListener = this
-        )
-    }
-    
-    /**
-     * Call this method to start streaming images from the camera.
-     */
-    fun startStreamingCamera() {
-        cameraAdapter.bindToLifecycle(this)
-    }
-
-    /**
-     * Call this method to get a stream of images from the camera.
-     */
-    fun getCameraImageStream() = cameraAdapter.getImageStream()
-
-    override fun onCameraOpenError(cause: Throwable?) {
-        // The camera could not be opened
-    }
-
-    override fun onCameraAccessError(cause: Throwable?) {
-        // The camera could not be accessed
-    }
-
-    override fun onCameraUnsupportedError(cause: Throwable?) {
-        // the camera is not supported on this device.
-    }
-}
-```
-
-## Developing this library
-
-See the [development documentation](docs/develop.md) for details on developing this library.
+## Developing
+See the [development docs](https://docs.getbouncer.com/card-scan/android-integration-guide/android-development-guide) for details on developing this library.
 
 ## Authors
-
 Adam Wushensky, Sam King, and Zain ul Abi Din
 
 ## License
-
 This library is available under paid and free licenses. See the [LICENSE](LICENSE) file for the full license text.
 
 ### Quick summary
