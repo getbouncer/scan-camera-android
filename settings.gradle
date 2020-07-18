@@ -1,2 +1,0 @@
-include ':scan-camera'
-rootProject.name='scan-camera-android'
